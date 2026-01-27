@@ -43,3 +43,9 @@ ehthumbs.db
 
 # Ignore Windows Zone.Identifier files
 *:Zone.Identifier
+
+# Remove outputs
+chiquadro*
+spline*
+tab*
+*sigma*
