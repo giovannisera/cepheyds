@@ -14,7 +14,7 @@ The goal is to calculate the expansion rate of the Universe ($H_0$) using the "c
 3.  **Distances:** Calculation of distance moduli for 10 target galaxies.
 4.  **Cosmology:** Estimation of $H_0$ and analysis of density parameters ($\Omega_m, \Omega_\Lambda$).
 
-**Result:** $H_0 = 76.54 \pm 1.22 \text{ km s}^{-1} \text{ Mpc}^{-1}$ [cite: 297]
+**Result:** $H_0 = 76.54 \pm 1.22 \text{ km s}^{-1} \text{ Mpc}^{-1}$
 
 ## Tech Stack
 
