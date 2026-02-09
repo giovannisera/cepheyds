@@ -1,5 +1,5 @@
 !MODULI
-MODULE strumenti
+MODULE tools
     IMPLICIT NONE
     CONTAINS
     SUBROUTINE w_mean(x, sigma, n, media, media_err)
@@ -58,12 +58,12 @@ MODULE strumenti
             ENDIF
         ENDDO
     END SUBROUTINE sorting
-END MODULE strumenti
+END MODULE tools
 
-MODULE fase_1
+MODULE phase_1
     IMPLICIT NONE
     CONTAINS
-    SUBROUTINE jordan(a, c, neq, x)
+    SUBROUTINE jordan(a, c, neq, x) !jordan elimination 
         IMPLICIT NONE
 
         INTEGER :: neq
@@ -93,7 +93,7 @@ MODULE fase_1
         x = c
     END SUBROUTINE jordan
 
-    SUBROUTINE fit_lin(x, y, ndati, nv, coeff)
+    SUBROUTINE fit_lin(x, y, ndati, nv, coeff) !linear fit
         IMPLICIT NONE
 
         INTEGER, INTENT(IN) :: ndati, nv
@@ -124,10 +124,10 @@ MODULE fase_1
 
         CALL jordan(a, c, nv, coeff)
     END SUBROUTINE fit_lin
-END MODULE fase_1
+END MODULE phase_1
 
-MODULE fase_2
-    USE fase_1
+MODULE phase_2
+    USE phase_1
     IMPLICIT NONE
     CONTAINS
     SUBROUTINE inter(x1, x2, dx2, y, n, out)
@@ -147,9 +147,10 @@ MODULE fase_2
         (dx2(i) / (6.d0* (x1(i) - x1(i-1)))) * (y - x1(i-1))**3 +&
             ((x2(i-1) / (x1(i) - x1(i-1))) - dx2(i-1) * (x1(i)-x1(i-1)) /6.d0) * (x1(i) - y) +&
                 ((x2(i) / (x1(i) - x1(i-1))) - (dx2(i) * (x1(i) - x1(i-1))) /6.d0) * (y - x1(i-1)) 
+
     END SUBROUTINE inter
  
-    SUBROUTINE spline_cubica(x1, x2, n, dx2)
+    SUBROUTINE cubic_spline(x1, x2, n, dx2)
         IMPLICIT NONE
 
         INTEGER, INTENT(IN) :: n
@@ -176,9 +177,9 @@ MODULE fase_2
         ENDDO
 
         CALL jordan(m, c, n, dx2)
-    END SUBROUTINE spline_cubica
+    END SUBROUTINE cubic_spline
 
-    SUBROUTINE chiquadro(periodi_test, chi, time, appmag, err, len, n, dx2)
+    SUBROUTINE chisquared(periodi_test, chi, time, appmag, err, len, n, dx2)
         IMPLICIT NONE
         
         INTEGER, INTENT(IN) :: n, len
@@ -209,15 +210,15 @@ MODULE fase_2
                     ENDDO
                 ENDDO
             ENDDO
-            chi(i) = summa / (count - 1) !chiquadro ridotto
+            chi(i) = summa / (count - 1) !chisquared ridotto
         ENDDO    
-    END SUBROUTINE chiquadro
-END MODULE fase_2
+    END SUBROUTINE chisquared
+END MODULE phase_2
 
-MODULE fase_cosmologia
+MODULE cosmology
     IMPLICIT NONE
     CONTAINS
-        SUBROUTINE quadratura (integranda, a, b, OM, OL, risultato)
+        SUBROUTINE quadrature (integranda, a, b, OM, OL, risultato)
             IMPLICIT NONE
             
             INTEGER, PARAMETER :: npunti = 4
@@ -250,15 +251,14 @@ MODULE fase_cosmologia
                 summa = summa + c(i) *integranda(OM, OL, x(i))
             ENDDO
             risultato = summa *(b-a) /2.d0 ! moltiplico per il contributo dovuto al differenziale del cambio di variabile
-        END SUBROUTINE quadratura
-END MODULE fase_cosmologia
+        END SUBROUTINE quadrature
+END MODULE cosmology
 
-!PROGAMMA
 PROGRAM main    
-    USE strumenti
-    USE fase_1
-    USE fase_2
-    USE fase_cosmologia
+    USE tools
+    USE phase_1
+    USE phase_2
+    USE cosmology
     IMPLICIT NONE
 
     CHARACTER(LEN=1) :: letters(3)
@@ -268,7 +268,7 @@ PROGRAM main
 
     INTEGER :: len, start, n, nn, mm
     INTEGER, PARAMETER :: nv = 2, npoints = 1000
-    INTEGER :: i, j, k, h, g, scorri, l, count, count2 !per iterazioni
+    INTEGER :: i, j, k, h, g, scorri, l, count, count2 !iterations
     
     REAL*8 :: p_min, p_max, out, out_sx, out_dx, psx_min, psx_max, pdx_min, pdx_max,&
                 summa, summa2, pe, w, hubble_constant,&
@@ -294,7 +294,7 @@ PROGRAM main
     PRINT*, "###FASE 1 in corso..."
     OPEN(1, FILE = "ceph_catalog.txt")
     len = 0
-    DO 
+    DO !what is the array length?
         READ(1, *, END=100)
         len = len + 1
     ENDDO
@@ -360,7 +360,7 @@ PROGRAM main
             CLOSE(2)
 
             !SPLINE CUBICA DELLA CURVA DI LUCE
-            CALL spline_cubica(time, appmag, len, dx2)
+            CALL cubic_spline(time, appmag, len, dx2)
             OPEN(3, FILE="spline_ceph"//galaxies(i)&
                                 //letters(j)//".txt")
             DO k=0, npoints-1
@@ -403,9 +403,9 @@ PROGRAM main
             DO k=0, n-1
                 periodi_test(k) = p_min + 0.02d0 * k
             ENDDO
-            OPEN(4, FILE="chiquadro_ceph"//galaxies(i)&
+            OPEN(4, FILE="chisquared_ceph"//galaxies(i)&
                                 //letters(j)//".txt")
-            CALL chiquadro(periodi_test, chi, time, appmag, err_appmag, len, n, dx2)
+            CALL chisquared(periodi_test, chi, time, appmag, err_appmag, len, n, dx2)
             DO k=0, n-1
                 WRITE(4, *) periodi_test(k), chi(k)
             ENDDO
@@ -420,9 +420,9 @@ PROGRAM main
 	        DO k=0, nn-1
 		        p_sx(k) = psx_min + 0.02d0 * k
 	        ENDDO
-	        CALL chiquadro(p_sx, chi_sx, time, appmag, err_appmag, len, nn, dx2)
+	        CALL chisquared(p_sx, chi_sx, time, appmag, err_appmag, len, nn, dx2)
             CALL sorting(chi_sx, size(chi_sx), p_sx)
-            CALL spline_cubica(chi_sx, p_sx, size(chi_sx), dx2)
+            CALL cubic_spline(chi_sx, p_sx, size(chi_sx), dx2)
             !1 sigma a sinistra
 	        CALL inter(chi_sx, p_sx, dx2, chi(0) + 1.d0, size(chi_sx), out_sx)
 	        !DX 
@@ -434,10 +434,10 @@ PROGRAM main
 		        p_dx(k) = pdx_min + 0.02d0 * k
 	        ENDDO
             !devo ricavarmi di nuovo dx2 della curva di luce per calcolare il chi-quadro
-            CALL spline_cubica(time, appmag, len, dx2) 
-	        CALL chiquadro(p_dx, chi_dx, time, appmag, err_appmag, len, nn, dx2)
+            CALL cubic_spline(time, appmag, len, dx2) 
+	        CALL chisquared(p_dx, chi_dx, time, appmag, err_appmag, len, nn, dx2)
             CALL sorting(chi_dx, size(chi_dx), p_dx)
-            CALL spline_cubica(chi_dx, p_dx, size(chi_dx), dx2)
+            CALL cubic_spline(chi_dx, p_dx, size(chi_dx), dx2)
             !1 sigma a destra
 	        CALL inter(chi_dx, p_dx, dx2, chi(0) + 1.d0, size(chi_dx), out_dx)
 	        !l'errore sul periodo è il massimo tra i due errori trovati
@@ -449,7 +449,7 @@ PROGRAM main
             periodo(scorri) = periodi_test(0)
  
             !MAGNITUDINE APPARENTE MEDIA CON ERRORE ASSOCIATO
-            CALL spline_cubica(time, appmag, len, dx2) 
+            CALL cubic_spline(time, appmag, len, dx2) 
             pe = periodi_test(0) !periodo
             n = INT((time(len) - time(1)) /(pe /100.d0)) + 1 !numero di dati da interpolare
             mm = INT((time(len) - time(1)) /pe) + 1 !numero di periodi coperti dai dati
@@ -492,7 +492,7 @@ PROGRAM main
             errori_magnitudini_assolute(scorri) = ABS(coeff(2) /(periodo(scorri) *LOG(10.d0))) *err_periodi(scorri)
             modulo_di_distanza(scorri) = magnitudini_apparenti(scorri) - magnitudini_assolute(scorri)
             errori_modulo_dist(scorri) = SQRT( errori_magnitudini_apparenti(scorri)**2 +&
-                                         errori_magnitudini_assolute(scorri)**2 ) !somma in quadratura
+                                         errori_magnitudini_assolute(scorri)**2 ) !somma in quadrature
             distanze(scorri) = (10 **(0.2d0 *modulo_di_distanza(scorri) + 1.d0))  /10**6 ![MegaParsec]
             err_distanze(scorri) = 0.2d0 *LOG(10.d0) *distanze(scorri) *errori_modulo_dist(scorri) ![MegaParsec]
             dist_gal(j) = distanze(scorri)
@@ -557,8 +557,8 @@ PROGRAM main
     DO WHILE ( OM >= 0.d0 .and. OM <= 1 )
         OL = 0.d0
         DO WHILE ( OL >= 0.d0 .and. OL <= 1 )
-            CALL quadratura( integranda1, 0.d0, 1.d0, OM, OL, t_1) ! primo addendo dell'integrale
-            CALL quadratura( integranda2, 0.d0, 1.d0, OM, OL, t_2) ! secondo addendo dell'integrale
+            CALL quadrature( integranda1, 0.d0, 1.d0, OM, OL, t_1) ! primo addendo dell'integrale
+            CALL quadrature( integranda2, 0.d0, 1.d0, OM, OL, t_2) ! secondo addendo dell'integrale
             t_0 = (1.d0 /hubble_constant) * (t_1 + t_2) 
             IF (t_0 >= 13.82d0 - 0.14d0 .and. t_0 <= 13.82d0 + 0.14d0) THEN
                 !1-sigma

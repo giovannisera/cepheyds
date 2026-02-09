@@ -20,7 +20,7 @@
 *.app
 
 # Specific project executable
-cepheids_analysis
+analysis_cepheyds
 
 # --- Python (Plotting & Scripts) ---
 # Python cache and virtual environments
@@ -52,3 +52,6 @@ chiquadro*
 spline*
 tab*
 *sigma*
+fit.log
+hubble.txt
+periodi_ceph.txt

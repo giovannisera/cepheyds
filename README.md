@@ -1,6 +1,6 @@
 # Hubble Constant Estimation via Cepheid Variables
 
-This project implements a numerical pipeline in **Fortran 90** to estimate the **Hubble Constant ($H_0$)** and the age of the Universe. The analysis is based on the light curves of 30 Cepheid stars observed in 10 different galaxies.
+This project implements a numerical pipeline in **Fortran 90** to estimate the **Hubble Constant ($H_0$)** and the age of the Universe. The analysis is based on the light curves of 30 Cepheid stars observed in 10 galaxies (3 starsfor each of them) of the NGC catalogue.
 
 The project also includes a cosmological analysis based on the $\Lambda$-CDM model, comparing the obtained results with data from the Planck satellite (2018).
 
@@ -9,7 +9,8 @@ The project also includes a cosmological analysis based on the $\Lambda$-CDM mod
 ## Project Overview
 
 The goal is to calculate the expansion rate of the Universe ($H_0$) using the "cosmic distance ladder" method, following these steps:
-1.  **Calibration:** Fitting the Period-Luminosity (P-L) relationship (Leavitt's Law).
+1.  **Calibration:** Fitting the Period-Luminosity (P-L) relationship (Leavitt's Law)
+    the relations has been fitted using the data in "ceph_catalog.txt";
 2.  **Light Curve Analysis:** Determination of the pulsation period and mean magnitude via Spline interpolation.
 3.  **Distances:** Calculation of distance moduli for 10 target galaxies.
 4.  **Cosmology:** Estimation of $H_0$ and analysis of density parameters ($\Omega_m, \Omega_\Lambda$).
