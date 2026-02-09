@@ -47,8 +47,4 @@ The code is modular and implements the following algorithms from scratch (no ext
 Ensure `gfortran` is installed on your machine.
 
 ### Compilation
-To compile the project, run the following commands in the root directory (respecting module dependencies):
-
-```bash
-gfortran -c mod_strumenti.f90 mod_fase1.f90 mod_fase2.f90 mod_fase_cosmologia.f90
-gfortran main.f90 mod_strumenti.o mod_fase1.o mod_fase2.o mod_fase_cosmologia.o -o cepheids_analysis
+- run "make" to compile
