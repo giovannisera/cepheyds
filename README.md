@@ -35,12 +35,12 @@ The code is modular and implements the following algorithms from scratch (no ext
 
 ## Repository Structure
 
-* `main.f90`: Main program orchestrating the analysis.
+* `0_main.f90`: Main program orchestrating the analysis.
 * `mod_strumenti.f90`: Tools module (Sorting, Weighted Mean, Spline, Gauss-Jordan).
 * `mod_fase1.f90`: P-L relation calibration.
 * `mod_fase2.f90`: Cepheid analysis (light curves, periods).
 * `mod_fase_cosmologia.f90`: $H_0$ calculation and $\Lambda$-CDM integration.
-* `data/`: Stellar catalogs (`ceph_catalog.txt`), light curves (`ceph_NGC*.txt`), and recession velocities (`gal_vel.txt`).
+*  Stellar catalogs (`ceph_catalog.txt`), light curves (`ceph_NGC*.txt`), and recession velocities (`gal_vel.txt`).
 
 ## Installation and Usage
 
